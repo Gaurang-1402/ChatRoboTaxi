@@ -37,8 +37,8 @@ api = Api(app)
 # Get the API key from the environment variable. 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
-if openai_api_key == None:
-    openai.api_key = "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"
+# if openai_api_key == None:
+#     openai.api_key = ""
 
 #print(openai_api_key)
 
