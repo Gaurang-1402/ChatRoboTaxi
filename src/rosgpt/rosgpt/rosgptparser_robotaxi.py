@@ -6,7 +6,10 @@ import copy
 import math
 import rclpy 
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, Vector3, Int
+from geometry_msgs.msg import Twist, Vector3
+from std_msgs.msg import Float32
+
+from std_msgs.msg import String, Int16
 import subprocess
 
 from geometry_msgs.msg import Pose
@@ -25,7 +28,8 @@ class RoboTaxiController(Node):
         super().__init__('robotaxi_controller')
         self.create_subscription(String,'/voice_cmd',self.voice_cmd_callback,10)
         self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.distance_subscriber = self.create_subscription(Int, "/distance", self.distance_callback, 10)
+
+        self.distance_subscriber = self.create_subscription(Float32, "/distance", self.distance_callback, 10)
         self.x = 0.0
         self.y  = 0.0
         self.theta  = 0.0
@@ -38,8 +42,17 @@ class RoboTaxiController(Node):
         move_thread.start()
         print('ROSGPT Robo RoboTaxi Controller Started. Waiting for input commands ...')
     
+
     def distance_callback(self, msg):
-        self.curr_dist = msg.data
+        if isinstance(msg, Float32):
+            self.curr_dist = msg.data
+        elif isinstance(msg, Int16):
+            self.curr_dist = float(msg.data)  # Convert Int16 to float for consistency
+        else:
+            print('Received an unexpected message type for the /distance topic.')
+            return
+
+        # print(f'Updated Distance: {self.curr_dist}')
 
     def stop(self):
         print('Stopping the robotaxi ...')
@@ -66,7 +79,6 @@ class RoboTaxiController(Node):
                 linear_speed = cmd['params'].get('linear_speed', 0.2)
                 distance = cmd['params'].get('distance', 1.0)
                 direction = cmd['params'].get('direction', "forward")
-
                 print(f'linear_speed: {linear_speed}, distance: {distance}, direction: {direction}')
 
                 self.thread_executor.submit(self.move, linear_speed, distance, direction)
@@ -79,13 +91,11 @@ class RoboTaxiController(Node):
 
             elif cmd['action'] == 'rotate':
                 angular_speed = cmd['params'].get('angular_speed', 0.2)
-                angle = cmd['params'].get('angle', 1.0)
+                angle = float(cmd['params'].get('angle', 1.0))
                 direction = cmd['params'].get('direction', "clockwise")
 
                 print(f'angular_speed: {angular_speed}, angle: {angle}, direction: {direction}')
-
                 self.thread_executor.submit(self.rotate, angular_speed, angle, direction)
-
  
         except json.JSONDecodeError:
             print('[json.JSONDecodeError] Invalid or empty JSON string received:', msg.data)
@@ -104,144 +114,79 @@ class RoboTaxiController(Node):
         except Exception as e:
             print(f"Failed to start computer_vision_node: {str(e)}")
     
+
     def move(self, linear_speed, distance, direction): 
         print(f'Start moving the robotaxi {direction} at {linear_speed} m/s for a distance of {distance} meters')
 
-        if abs(linear_speed) > 1.0:
-            print('[ERROR]: The speed in any direction must be lower than 1.0!')
-            return -1
-        
-        
         linear_vector = Vector3()
-        angular_vector = Vector3()
 
-        try: 
-            if direction == "forward":
-                linear_vector.x = linear_speed
-                linear_vector.y = 0.0
-                linear_vector.z = 0.0
+        if direction == "forward":
+            linear_vector.x = linear_speed
+        elif direction == "backward":
+            linear_vector.x = -linear_speed
+        else:
+            print('Invalid direction provided')
+            return
 
-            elif direction == "backward":
-                linear_vector.x = -linear_speed
-                linear_vector.y = 0.0
-                linear_vector.z = 0.0
+        twist_msg = Twist()
+        twist_msg.linear = linear_vector
+
+        # Reset distance traveled
+        traveled_distance = 0
+        initial_distance = self.get_distance() 
+
+        try:
+            while traveled_distance < distance:
+                self.velocity_publisher.publish(twist_msg)
+                self.move_executor.spin_once(timeout_sec=0.1)
+                current_distance = self.get_distance()
+                traveled_distance = abs(current_distance - initial_distance)
+                print(traveled_distance)
+        except Exception as e:
+            print('[Exception] An unexpected error occurred:', str(e))
             
 
-        except Exception as e:
-            print('[Exception] An unexpected error occurred:', str(e))
-
-        twist_msg = Twist()
-        twist_msg.linear = linear_vector
-
-        try:
-            # Set the start time
-            start_time = time.time()
-
-            while time.time() - start_time < 5:  # Lo$ ros2 launch robotaxi_gazebo forest.launch.pyop for 5 seconds
-                self.velocity_publisher.publish(twist_msg)
-                self.move_executor.spin_once(timeout_sec=0.5)
-
-        except Exception as e:
-
-            print('[Exception] An unexpected error occurred:', str(e))
-        # Stop the movement after 5 seconds
-        twist_msg.linear.x = 0
-        twist_msg.linear.y = 0
-        twist_msg.linear.z = 0
-        twist_msg.angular.x = 0
-        twist_msg.angular.y = 0
-        twist_msg.angular.z = 0
-        self.velocity_publisher.publish(twist_msg)
+        print("stop here")
+        # Stop the movement after reaching the target distance
+        self.stop()
 
         print("Stopping the robotaxi ...")
 
 
-    def rotate(self, angular_speed, distance, direction): 
-        print(f'Start rotating the robotaxi {direction} at {angular_speed} m/s for a distance of {distance} meters')
+    def rotate(self, angular_speed, angle, direction): 
+        print(f'Start rotating the robotaxi {direction} at {angular_speed} rad/s for 5 seconds.')
 
-        if abs(angular_speed) > 1.0:
-            print('[ERROR]: The speed in any direction must be lower than 1.0!')
-            return -1
-        
-        
         angular_vector = Vector3()
         linear_vector = Vector3()
+        linear_vector.x = 2.0
 
-        try: 
-            if direction == "clockwise":
-                '''
-                linear:
-                x: 0.5
-                y: 0.0
-                z: 0.0
-                angular:
-                x: 0.0
-                y: 0.0
-                z: -1.0
-                ---
-                '''
-
-                linear_vector.x = 0.5
-                angular_vector.x = 0.0
-                angular_vector.y = 0.0
-                angular_vector.z = -angular_speed
-
-            elif direction == "anticlockwise":
-                '''
-                linear:
-                x: 0.5
-                y: 0.0
-                z: 0.0
-                angular:
-                x: 0.0
-                y: 0.0
-                z: 1.0
-                ---
-                '''
-
-                linear_vector.x = 0.5
-                angular_vector.x = 0.0
-                angular_vector.y = 0.0
-                angular_vector.z = angular_speed
-
-                
-
-            linear_vector.z = 0.0
-            linear_vector.y = 0.0
-
-
-
-        except Exception as e:
-            print('[Exception] An unexpected error occurred:', str(e))
+        if direction == "clockwise":
+            angular_vector.z = -angular_speed
+        elif direction == "anticlockwise":
+            angular_vector.z = angular_speed
+        else:
+            print('Invalid direction provided')
+            return
 
         twist_msg = Twist()
-        twist_msg.linear = linear_vector
         twist_msg.angular = angular_vector
+        twist_msg.linear = linear_vector
 
         try:
-            start_pose = copy.copy(self.pose)
-            # Set the start time
             start_time = time.time()
-            # print('start_pose: ', start_pose)
-            # print('current_pose: ', self.pose)
             while time.time() - start_time < 5:  # Loop for 5 seconds
                 self.velocity_publisher.publish(twist_msg)
-                self.move_executor.spin_once(timeout_sec=0.5)
-
+                print("publish")
+                self.move_executor.spin_once(timeout_sec=0.1)
 
         except Exception as e:
-
             print('[Exception] An unexpected error occurred:', str(e))
-        # Stop the movement after 5 seconds
-        twist_msg.linear.x = 0
-        twist_msg.linear.y = 0
-        twist_msg.linear.z = 0
-        twist_msg.angular.x = 0
-        twist_msg.angular.y = 0
-        twist_msg.angular.z = 0
-        self.velocity_publisher.publish(twist_msg)
+
+        # Stop the rotation after 5 seconds
+        self.stop()
 
         print("Stopping the robotaxi ...")
+
 
     
 def main(args=None):

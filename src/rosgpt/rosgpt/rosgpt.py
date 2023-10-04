@@ -37,6 +37,9 @@ api = Api(app)
 # Get the API key from the environment variable. 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
+if openai_api_key == None:
+    openai.api_key = "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"
+
 #print(openai_api_key)
 
 # Now you can use the openai_api_key variable to authenticate with the OpenAI API
