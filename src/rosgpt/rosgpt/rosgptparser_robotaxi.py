@@ -7,7 +7,7 @@ import math
 import rclpy 
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, Vector3, Int
-
+import subprocess
 
 from geometry_msgs.msg import Pose
 import time
@@ -74,6 +74,8 @@ class RoboTaxiController(Node):
             elif cmd['action'] == 'stop':
                 self.thread_executor.submit(self.stop)
 
+            elif cmd['action'] == 'self_drive':
+                self.thread_executor.submit(self.self_drive)
 
             elif cmd['action'] == 'rotate':
                 angular_speed = cmd['params'].get('angular_speed', 0.2)
@@ -91,13 +93,17 @@ class RoboTaxiController(Node):
             print('[Exception] An unexpected error occurred:', str(e))   
 
 
-    def get_distance(self, start, destination):
-        return math.sqrt(
-            ((destination.position.x - start.position.x) ** 2) +
-            ((destination.position.y - start.position.y) ** 2) +
-            ((destination.position.z - start.position.z) ** 2)
-        )
-
+    def get_distance(self):
+        return copy.copy(self.curr_dist)
+    
+    def self_drive(self):
+        try:
+            # Start the computer_vision_node
+            subprocess.Popen(["ros2", "run", "self_driving_car_pkg", "computer_vision_node"])
+            print("Successfully started computer_vision_node.")
+        except Exception as e:
+            print(f"Failed to start computer_vision_node: {str(e)}")
+    
     def move(self, linear_speed, distance, direction): 
         print(f'Start moving the robotaxi {direction} at {linear_speed} m/s for a distance of {distance} meters')
 
@@ -107,6 +113,7 @@ class RoboTaxiController(Node):
         
         
         linear_vector = Vector3()
+        angular_vector = Vector3()
 
         try: 
             if direction == "forward":
@@ -118,6 +125,7 @@ class RoboTaxiController(Node):
                 linear_vector.x = -linear_speed
                 linear_vector.y = 0.0
                 linear_vector.z = 0.0
+            
 
         except Exception as e:
             print('[Exception] An unexpected error occurred:', str(e))
@@ -132,7 +140,6 @@ class RoboTaxiController(Node):
             while time.time() - start_time < 5:  # Lo$ ros2 launch robotaxi_gazebo forest.launch.pyop for 5 seconds
                 self.velocity_publisher.publish(twist_msg)
                 self.move_executor.spin_once(timeout_sec=0.5)
-
 
         except Exception as e:
 

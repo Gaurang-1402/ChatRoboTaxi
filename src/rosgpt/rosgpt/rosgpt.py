@@ -151,32 +151,64 @@ class ROSGPTProxy(Resource):
             str: The response from the GPT-3 model as a JSON string.
         """
         # Create the GPT-3 prompt with example inputs and desired outputs
-        prompt = '''Consider the following ontology:
-                    {"action": "move", "params": {"linear_speed": linear_speed, "distance": distance, "direction": direction}}
-                    {"action": "stop", "params": {}}
-                    {"action": "rotate", "params": {"angular_speed": angular_speed, "angle": angle, "direction": direction, "body_part": body_part}}
+        prompt = '''
 
-                    The 'direction' parameter can take values "forward", "backward", "left", "right" to indicate the direction of movement. The 'body_part' parameter can take values "head", "torso". Here are some examples.
+        Consider the following ontology:
+        {"action": "move", "params": {"linear_speed": linear_speed, "distance": distance, "direction": direction}}
+        {"action": "stop", "params": {}}
+        {"action": "rotate", "params": {"angular_speed": angular_speed, "angle": angle, "direction": direction}}
+        {"action": "self_drive","params": {}}
 
-                    if speed is not given in the prompt, it is assumed to be 0.5 meters per second for linear speed and 0.5 radians per second for angular speed.
-                    all numerical answers should be in float form
-                    prompt: "Move forward for 1 meter at a speed of 0.5 meters per second."
-                    returns: {"action": "move", "params": {"linear_speed": 0.5, "distance": 1, "direction": "forward"}}
+        The 'direction' parameter can take values "forward", "backward", "left", "right" to indicate the direction of movement. 
+        Here are some examples:
 
-                    prompt: "Move backward for 2 meters at a speed of 0.7 meters per second."
-                    returns: {"action": "move", "params": {"linear_speed": 0.7, "distance": 2, "direction": "backward"}}
+        If speed is not given in the prompt, it is assumed to be 0.5 meters per second for linear speed and 0.5 radians per second for angular speed.
+        All numerical answers should be in float form.
 
-                    prompt: "Rotate head clockwise for 3 radians at a speed of 0.6 radians per second."
-                    returns: {"action": "rotate", "params": {"angular_speed": 0.6, "angle": 3, "direction": "clockwise", "body_part": "head"}}
+        Prompt: "Move forward for 1 meter at a speed of 0.5 meters per second."
+        Returns: {"action": "move", "params": {"linear_speed": 0.5, "distance": 1, "direction": "forward"}}
 
-                    prompt: "Rotate torso anticlockwise for 4 radians at a speed of 0.5 radians per second."
-                    returns: {"action": "rotate", "params": {"angular_speed": 0.5, "angle": 4, "direction": "anticlockwise", "body_part": "torso"}}
+        Prompt: "Move backward for 2 meters at a speed of 0.7 meters per second."
+        Returns: {"action": "move", "params": {"linear_speed": 0.7, "distance": 2, "direction": "backward"}}
 
-                    prompt: "Stop moving"
-                    returns: {"action": "stop", "params": {}}
+        Prompt: "Rotate clockwise for 3 radians at a speed of 0.6 radians per second."
+        Returns: {"action": "rotate", "params": {"angular_speed": 0.6, "angle": 3, "direction": "clockwise"}}
 
-                    You will be given human language prompts, and you need to return a JSON conformant to the ontology. Any action not in the ontology must be ignored.
-                    '''
+        Prompt: "Rotate anticlockwise for 4 radians at a speed of 0.5 radians per second."
+        Returns: {"action": "rotate", "params": {"angular_speed": 0.5, "angle": 4, "direction": "anticlockwise"}}
+        
+        Prompt: "Go autonomous."
+        Returns: {"action": "rotate", "params": {"angular_speed": 0.5, "angle": 4, "direction": "anticlockwise"}}
+        
+        Prompt: "Self drive."
+        Returns: {"action": "self_drive", "params": {}}
+
+        default value for speed is 2 meters per second for linear speed and 0.5 radians per second for angular speed.
+
+        Prompt: "Stop moving"
+        Returns: {"action": "stop", "params": {}}
+
+        You will be given human language prompts, and you need to return a JSON conformant to the ontology. Any action not in the ontology must be ignored.
+
+        Examples in other languages:
+
+        German:
+        Prompt: "Bewegen Sie sich vorwärts für 1 Meter mit einer Geschwindigkeit von 0,5 Metern pro Sekunde."
+        Returns: {"action": "move", "params": {"linear_speed": 0.5, "distance": 1, "direction": "forward"}}
+
+        Japanese:
+        Prompt: "Mae ni 1 meter, 0.5 meters per second no sokudo de susumu."
+        Returns: {"action": "move", "params": {"linear_speed": 0.5, "distance": 1, "direction": "forward"}}
+
+        Hindi:
+        Prompt: "Aage badho 1 meter, 0.5 meters per second ke liye."
+        Returns: {"action": "move", "params": {"linear_speed": 0.5, "distance": 1, "direction": "forward"}}
+
+        Hindi:
+        Prompt: "Gaadi khud se chalao"
+        Returns: {"action": "self_drive", "params": {}}
+
+        '''
 
 
         prompt = prompt+'\nprompt: '+text_command
@@ -185,7 +217,7 @@ class ROSGPTProxy(Resource):
 
         # Create the message structure for the GPT-3 model
         messages = [
-            {"role": "system", "content": "You are a robot brain that translates human natural language to robot control commands in json."},
+            {"role": "system", "content": "You are a robot brain that translates human natural language to robot control commands for a self driving four wheel car in json."},
             {"role": "user", "content": prompt}
         ]
 
