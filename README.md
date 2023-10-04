@@ -1,4 +1,4 @@
-# ChatRoboTaxi: Control Mobile Robot with Natural Language
+# ChatRoboTaxi: Control Self-Driving car with Natural Language
 
 ChatRoboTaxi is a project that merges Language Logic Models (LLMs) with the control of self driving cars. With it, users can operate self driving cars using simple, natural language commands. The project is built using ROS2 (Robot Operating System) Foxy, and its simulations run within the Gazebo environment, providing a realistic platform for self driving car behavior.
 
