@@ -11,7 +11,6 @@ source ROS2SDC_VENV/bin/activate
 source install/setup.sh
 ros2 launch self_driving_car_pkg world_gazebo.launch.py
 
-
 source ROS2SDC_VENV/bin/activate
 source install/setup.sh
 ros2 run self_driving_car_pkg computer_vision_node

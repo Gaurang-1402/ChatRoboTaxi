@@ -162,6 +162,9 @@ class ROSGPTProxy(Resource):
         {"action": "rotate", "params": {"angular_speed": angular_speed, "angle": angle, "direction": direction}}
         {"action": "self_drive","params": {}}
 
+        ALL NUMBERS I THE JSON MUST BE FLOATING POINT NUMBERS
+        FOR EXAMPLE CONVERT 1 to 1.0
+
         The 'direction' parameter can take values "forward", "backward", "left", "right" to indicate the direction of movement. 
         Here are some examples:
 

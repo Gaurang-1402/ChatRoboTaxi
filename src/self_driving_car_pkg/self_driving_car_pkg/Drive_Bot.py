@@ -151,7 +151,7 @@ class Control:
 
 
         self.prev_Mode_LT = "Detection"
-        self.car_speed = 80
+        self.car_speed = 150
         self.angle_of_car = 0
 
         self.Left_turn_iterations = 0
