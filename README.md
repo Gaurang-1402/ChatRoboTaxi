@@ -7,20 +7,31 @@ Accompanying ChatRoboTaxi is a user-centric web application that presents users 
 While ChatRoboTaxi currently functions within a simulated environment for thorough testing and development, it is designed with real-world applications in mind. The system can translate natural language instructions into actual robotic commands when required.
 
 
-Self-Driving features include:
-- Lane Detection and Driving
-- Traffic Light Detection and control
-- Road Sign Detection and control
-- GPS Navigation
 
 
 ROSGPT features include:
 - A user-friendly web application that provides an interactive interface for self driving car control
-[![output-onlinegiftools-11-1.gif](https://i.postimg.cc/CxY3yS7g/output-onlinegiftools-11-1.gif)](https://postimg.cc/nCRRB8NR)
+[![one.gif](https://i.postimg.cc/668JxmFL/one.gif)](https://postimg.cc/fkQgxBzJ)
+
 - Full control over the self driving car's directional movement, including forward, backward, left, and right commands
-[![output-onlinegiftools-12-1.gif](https://i.postimg.cc/wM8WhQbp/output-onlinegiftools-12-1.gif)](https://postimg.cc/XGLcWdbH)
+[![two.gif](https://i.postimg.cc/Gtxv5QPB/two.gif)](https://postimg.cc/D4mWW1MF)
+
 - Support for commands in multiple languages
-[![output-onlinegiftools-13-1.gif](https://i.postimg.cc/Dw9bfpWn/output-onlinegiftools-13-1.gif)](https://postimg.cc/87bCtHB0)
+[![three.gif](https://i.postimg.cc/V6yMsTDr/three.gif)](https://postimg.cc/R3RqXPr4)
+
+- Autonomous driving mode including Lane Detection and Driving, Traffic Light Detection and control, Road Sign Detection and control and GPS Navigation
+[![four.gif](https://i.postimg.cc/FKxm1kxy/four.gif)](https://postimg.cc/t178MTwJ)
+
+Self-Driving features include:
+* **Lane Following**
+  -  ![alt text](https://github.com/noshluk2/ROS2-Self-Driving-Car-AI-using-OpenCV/blob/main/Images_videos/lane_detection.gif)
+* **Sign Board Detection**
+  - ![alt text](https://github.com/noshluk2/ROS2-Self-Driving-Car-AI-using-OpenCV/blob/main/Images_videos/traffic_signs_boards.gif)
+* **Traffic Signal Recognition**
+  - ![alt text](https://github.com/noshluk2/ROS2-Self-Driving-Car-AI-using-OpenCV/blob/main/Images_videos/traffic_signal.gif)
+
+* **T-Junction Navigation**
+  - ![alt text](https://github.com/noshluk2/ROS2-Self-Driving-Car-AI-using-OpenCV/blob/main/Images_videos/j_turning.gif)
 
 
 
