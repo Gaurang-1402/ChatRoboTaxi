@@ -9,7 +9,7 @@ While ChatRoboTaxi currently functions within a simulated environment for thorou
 
 
 
-ROSGPT features include:
+## ROSGPT features include:
 - A user-friendly web application that provides an interactive interface for self driving car control
 [![one.gif](https://i.postimg.cc/668JxmFL/one.gif)](https://postimg.cc/fkQgxBzJ)
 
@@ -22,7 +22,7 @@ ROSGPT features include:
 - Autonomous driving mode including Lane Detection and Driving, Traffic Light Detection and control, Road Sign Detection and control and GPS Navigation
 [![four.gif](https://i.postimg.cc/FKxm1kxy/four.gif)](https://postimg.cc/t178MTwJ)
 
-Self-Driving features include:
+## Self-Driving features include:
 * **Lane Following**
   -  ![alt text](https://github.com/noshluk2/ROS2-Self-Driving-Car-AI-using-OpenCV/blob/main/Images_videos/lane_detection.gif)
 * **Sign Board Detection**
